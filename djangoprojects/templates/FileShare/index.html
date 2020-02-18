@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>个人网盘系统</title>
+</head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<body>
+
+    <div class="row">
+        <div class="container-whole col-md-8">
+            <div class="row">
+                <h2 class="header-message col-md-8">{{ login_message }}
+                    <small>{{ upload_message }}</small>
+                    {% if is_login == True %}
+                    <button onclick="location.href='/fs/logout/'" class="btn btn-warning"><span
+                            class="glyphicon glyphicon-log-out" aria-hidden="true"></span> 注销
+                    </button>
+                    {% endif %}
+                </h2>
+            </div>
+
+            {% if is_login == False %}
+
+            <div class="container-login">
+                <!------------------------ 登录栏 ------------------------>
+
+                <form name="userForm" class="form-row" action="" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="input-group col-md-4" style="margin-bottom: 10px; padding-left: 15px;">
+                            <span class="input-group-addon" id="basic-addon1"><span
+                                    class="glyphicon glyphicon-user"></span></span>
+                            <input type="text" class="form-control" placeholder="用户名" aria-describedby="basic-addon1"
+                                id="username" name="username" autofocus required />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-primary" onClick="login()">
+                                    <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> 登录
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-group col-md-4" style="padding-left: 15px;">
+                            <span class="input-group-addon" id="basic-addon1"><span
+                                    class="glyphicon glyphicon-lock"></span></span>
+                            <input type="password" class="form-control" placeholder="密码" aria-describedby="basic-addon1"
+                                id="password" name="password" autofocus required />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-default" onClick="reg()">
+                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 注册
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {% endif %}
+
+            <div class="row">
+                <div class="container-upload-and-share" style="padding-top: 1rem;">
+                <div class="container-upload col-md-6">
+                    <!------------------------ 上传栏 ------------------------>
+
+                    <form action="/fs/upload/" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="input-group" style="width: 50px;">
+                            <input class="form-actions" type="file" name="file" id="file" style="padding-top: 5px;">
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-default">
+                                    <span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span> 上传
+                                </button>
+                            </span>
+                        </div>
+                    
+                    </form>
+                </div>
+
+                <div class="container-share-code col-md-6">
+                    <!------------------------ 分享码 ------------------------>
+                    <form class="form-inline" action="/fs/downByShareCode/" method="post">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1"><span
+                                    class="glyphicon glyphicon-share"></span></span>
+                            <input type="text" class="form-control" placeholder="输入分享码下载"
+                                aria-describedby="basic-addon1" id="share-code" name="share-code" autofocus required />
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-default">
+                                    <span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span> 下载
+                                </button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+
+            <div class="container-file-list" style="margin-top: 20px">
+                <!------------------------ 文件列表栏 ------------------------>
+                {% if is_login == True and not file_list %}
+                <!-- 已经登录并且 file_list 为空 -->
+                <h3>还没有上传过文件</h3>
+                {% endif %}
+                <table class="table">
+                    {% if is_login == True and file_list %}
+                    <tr>
+                        <td>文件名</td>
+                        <td>文件大小</td>
+                        <td>文件分享码</td>
+                        <td>操作</td>
+                    </tr>
+
+                    {% for f in file_list %}
+                    <tr>
+                        <td>{{ f.FileName }}</td>
+                        <td>{{ f.FileSize }} MB</td>
+                        <td>{{ f.ShareCode }}</td>
+                        <td><a href="/fs/download/{{ f.FileName }}">下载</a></td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </table>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script>
+    function login() {
+        document.userForm.action = "/fs/login/";
+        document.submit();
+    }
+
+    function reg() {
+        document.userForm.action = "/fs/reg/";
+        document.submit();
+    }
+
+</script>
+
+<style>
+    body {
+        background: linear-gradient(45deg, #B3D6D1 12.5%, #58a 0, #58a 25%, #B3D6D1 0, rgb(129, 189, 189) 0, rgb(129, 189, 188) 50%, #B3D6D1 0, #B3D6D1 62.5%, #58a 0, #58a 75%, #B3D6D1 0, rgb(129, 189, 189) 0);
+        background-size: 700px 700px;
+    }
+
+    .container-whole {
+        margin: 6rem 23rem;
+        padding: 50px;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 20px 20px 60px #528484;
+    }
+
+    /*.header-message {
+        margin: 30px 110px;
+    }
+
+    .container-login {
+        width: 340px;
+        margin: 30px 110px;
+    }
+
+    .container-upload-and-share {
+        display: flex;
+        margin: 30px 110px;
+
+    }
+
+    .container-file-list {
+        width: 700px;
+        margin: 30px 110px;
+    }*/
+</style>
+
+</html>

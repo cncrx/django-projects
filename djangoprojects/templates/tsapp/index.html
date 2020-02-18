@@ -1,0 +1,179 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>电影票比价</title>
+</head>
+
+<body>
+<div class="container" id="TicketService">
+    <div class="container-input">
+        城市: <input name="city" placeholder="城市" style="border-radius: 30px;padding-left: 10px;" v-model="city">
+        电影: <input name="movie" placeholder="电影名称" style="border-radius: 30px;padding-left: 10px;" v-model="movie">
+        <button v-on:click="onSubmit"  class="search-btn">查询</button>
+        <span style="margin-left: 1rem">首次查询电影时爬取需要一段时间，如还没数据，可能已更新反爬虫策略</span>
+    </div>
+
+    <div class="container-list">
+        {% verbatim myblock %}
+        <ul class="list-content">
+            <h1>猫眼网</h1>
+            <h3 v-if="!hasData">暂无数据，请先查询</h3>
+            <li v-for="cinema in maoyanListSorted">
+                <span class="list-movie">{{ cinema.cityName }}: {{ cinema.movieName }}</span>
+                <span class="list-price">{{ cinema.cinemaPrice }}</span>
+                <p class="list-addr">{{ cinema.cinemaAddr }}</p>
+            </li>
+        </ul>
+
+        <ul class="list-content">
+            <h1>时光网</h1>
+            <h3 v-if="!hasData">暂无数据，请先查询</h3>
+            <li v-for="cinema in mtimeListSorted">
+                <span class="list-movie">{{ cinema.cityName }}: {{ cinema.movieName }}</span>
+                <span class="list-price">{{ cinema.cinemaPrice }}</span>
+                <p class="list-addr">{{ cinema.cinemaAddr }}</p>
+            </li>
+        </ul>
+
+        <ul class="list-content">
+            <h1>糯米网</h1>
+            <h3 v-if="!hasData">暂无数据，请先查询</h3>
+            <li v-for="cinema in nuomiListSorted">
+                <span class="list-movie">{{ cinema.cityName }}: {{ cinema.movieName }}</span>
+                <span class="list-price">{{ cinema.cinemaPrice }}</span>
+                <p class="list-addr">{{ cinema.cinemaAddr }}</p>
+            </li>
+        </ul>
+         {% endverbatim myblock %}
+    </div>
+</div>
+
+
+</body>
+
+</html>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+<script>
+
+    const app = new Vue({
+        el: '#TicketService',
+
+        data() {
+            return {
+                movie: "",
+                city: "",
+                addrFilterText: "",
+                hasData: false,
+                maoyanList: [],
+                mtimeList: [],
+                nuomiList: [],
+            }
+        },
+
+        computed: {
+            maoyanListSorted: function () {
+                return this.maoyanList.sort(sortPrice)
+            },
+            mtimeListSorted: function () {
+                return this.mtimeList.sort(sortPrice)
+            },
+            nuomiListSorted: function () {
+                return this.nuomiList.sort(sortPrice)
+            },
+        },
+
+        methods: {
+            onSubmit() {
+                axios.post("/ts/cinemaslist/", {
+                    movie: this.movie,
+                    city: this.city
+                }).then((res) => {
+                    this.maoyanList = res.data["maoyan"]
+                    this.mtimeList = res.data["mtime"]
+                    this.nuomiList = res.data["nuomi"]
+                    this.hasData = true
+                }).catch(function (error) {
+                    console.log(error)
+                });
+            },
+        },
+
+    });
+    function sortPrice(a, b) {
+        return a-b;
+    }
+</script>
+
+<style>
+    body {
+        background: #f2fdf3;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+
+    }
+
+    .container-input {
+        height: 120px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .container-input input {
+        height: 30px;
+        border: 2px solid #99d7e4;
+        background: #f2fdf3;
+    }
+
+    .search-btn {
+        width: 60px;
+        height: 30px;
+        margin-left: 20px;
+        border-radius: 10px;
+        vertical-align: top;
+        background: #f2fdf3;
+        border: 2px solid #78b8c1;
+        transition-duration: 0.5s;
+    }
+
+    .search-btn:hover {
+        background: #78b8c1;
+    }
+
+    .container-list {
+        margin-top: 50px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+    }
+
+    .list-content h1{
+        background: #b6e0db;
+    }
+
+    .list-movie {
+        font-size: large;
+    }
+
+    .list-price {
+        font-size: large;
+    }
+
+    .list-price::after {
+        content: "元"
+    }
+
+    .list-addr {
+        font-size: small;
+    }
+
+</style>
+
