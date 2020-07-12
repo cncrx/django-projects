@@ -16,7 +16,7 @@ urlpatterns = [
     path('profile/', edit_profile.as_view(), name='edit_profile'),
 
     path('jobs/', jobs_list.as_view(), name="jobs_list"),
-    path('jobs/', jobs_create.as_view(), name="jobs_create"),
+    path('jobs/create', jobs_create.as_view(), name="jobs_create"),
     path('jobs/<int:pk>', jobs_details.as_view(), name="jobs_details"),
     path('jobs/<int:pk>', job_update.as_view(), name="jobs_update"),
 
